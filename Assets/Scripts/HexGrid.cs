@@ -47,6 +47,11 @@ public class HexGrid : MonoBehaviour {
     HexMesh hexMesh;
     HexCell[] cells;
 
+    int GetCellIndex(int column, int row)
+    {
+        return row * width + column;
+    }
+
     void Start()
     {
         hexMesh.Triangulate(cells);
@@ -59,30 +64,83 @@ public class HexGrid : MonoBehaviour {
 
         cells = new HexCell[height * width];
 
-        for (int z = 0, i = 0; z < height; z++)
+        for (int row = 0; row < height; row++)
         {
-            for (int x = 0; x < width; x++)
+            for (int column = 0; column < width; column++)
             {
-                CreateCell(x, z, i++);
+                CreateCell(column, row);
             }
         }
     }
 
-    void CreateCell(int x, int z, int i)
+    void CreateCell(int column, int row)
     {
         Vector3 position;
-        position.x = (x + z * 0.5f - z / 2) * (HexCell.Geometry.innerRadius * 2f);
+        position.x = (column + row * 0.5f - row / 2) * (HexCell.Geometry.innerRadius * 2f);
         position.y = 0f;
-        position.z = z * (HexCell.Geometry.outerRadius * 1.5f);
+        position.z = row * (HexCell.Geometry.outerRadius * 1.5f);
 
-        HexCell cell = cells[i] = Instantiate<HexCell>(cellPrefab);
+        HexCell cell = cells[GetCellIndex(column, row)] = Instantiate<HexCell>(cellPrefab);
         cell.transform.SetParent(transform, false);
         cell.transform.localPosition = position;
-        cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
+        cell.coordinates = HexCoordinates.FromOffsetCoordinates(column, row);
+        cell.color = HexCell.defaultColor;
+        cell.row = row;
+        cell.column = column;
 
         Text label = Instantiate<Text>(cellLabelPrefab);
         label.rectTransform.SetParent(gridCanvas.transform, false);
         label.rectTransform.anchoredPosition = new Vector2(position.x, position.z);
         label.text = cell.coordinates.ToStringOnSeparateLines();
+    }
+
+    public List<HexCell> GetNeighbours(HexCell cell)
+    {
+        List<HexCell> result = new List<HexCell>();
+
+        if (cell.column > 0)
+        {
+            result.Add(cells[GetCellIndex(cell.column - 1, cell.row)]);
+        }
+
+        if (cell.column < width - 1)
+        {
+            result.Add(cells[GetCellIndex(cell.column + 1, cell.row)]);
+        }
+
+        if (cell.row > 0)
+        {
+            result.Add(cells[GetCellIndex(cell.column, cell.row - 1)]);
+
+            // Shifted
+            if (cell.row % 2 == 0 && cell.column > 0)
+            {
+                result.Add(cells[GetCellIndex(cell.column - 1, cell.row - 1)]);
+            }
+
+            if (cell.row % 2 != 0 && cell.column < width - 1)
+            {
+                result.Add(cells[GetCellIndex(cell.column + 1, cell.row - 1)]);
+            }
+        }
+
+        if (cell.row < height - 1)
+        {
+            result.Add(cells[GetCellIndex(cell.column, cell.row + 1)]);
+
+            // Shifted
+            if (cell.row % 2 == 0 && cell.column > 0)
+            {
+                result.Add(cells[GetCellIndex(cell.column - 1, cell.row + 1)]);
+            }
+
+            if (cell.row % 2 != 0 && cell.column < width - 1)
+            {
+                result.Add(cells[GetCellIndex(cell.column + 1, cell.row + 1)]);
+            }
+        }
+
+
+        return result;
     }
 }
