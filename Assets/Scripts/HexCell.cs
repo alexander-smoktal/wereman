@@ -15,6 +15,7 @@ public class HexCell : MonoBehaviour {
     public Color originalColor = defaultColor;
     public int row;
     public int column;
+    public int firstVertex;
 
     public static class Geometry {
 		public const float outerRadius = 10f;
@@ -29,6 +30,8 @@ public class HexCell : MonoBehaviour {
 			new Vector3(-innerRadius, 0f, 0.5f * outerRadius),
             new Vector3(0f, 0f, outerRadius)
         };
+
+        public static Bounds bounds = new Bounds(Vector3.zero, new Vector3(innerRadius, 0, outerRadius));
 	}
 
     public bool IsPointInside(Vector3 point)

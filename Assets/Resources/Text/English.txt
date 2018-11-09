@@ -1,0 +1,10 @@
+QuitPopup = Are you sure you want to quit?
+
+ButtonBack = Back
+ButtonYes  = Yes
+ButtonNo   = No
+ButtonPlay = Play
+ButtonExit = Exit
+
+ButtonResume   = Resume
+ButtonMainMenu = Main Menu

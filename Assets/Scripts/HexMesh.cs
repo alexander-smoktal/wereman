@@ -16,8 +16,13 @@ public class HexMesh : MonoBehaviour
     List<Vector3> vertices;
     List<int> triangles;
     List<Color> colors;
+    List<Vector2> uv = new List<Vector2>();
     HexCell[] cells;
     MeshCollider coll;
+    Bounds bounds;
+
+    HexCell selected = null;
+    HexCell hoverCell = null;
 
     void Awake()
     {
@@ -38,20 +43,27 @@ public class HexMesh : MonoBehaviour
         vertices.Clear();
         triangles.Clear();
         colors.Clear();
-  
+        bounds = new Bounds();
+
         for (int i = 0; i < cells.Length; i++)
         {
             Triangulate(cells[i]);
         }
+
+        ComputeUVs();
+
         hexMesh.vertices = vertices.ToArray();
         hexMesh.triangles = triangles.ToArray();
         hexMesh.colors = colors.ToArray();
+        hexMesh.SetUVs(0, uv);
         hexMesh.RecalculateNormals();
         coll.sharedMesh = hexMesh;
     }
 
     void Triangulate(HexCell cell)
     {
+        cell.firstVertex = vertices.Count;
+
         Vector3 center = cell.transform.localPosition;
         for (int i = 0; i < 6; i++)
         {
@@ -62,6 +74,11 @@ public class HexMesh : MonoBehaviour
             );
             AddTriangleColor(cell.color);
         }
+
+        var cellBounds = HexCell.Geometry.bounds;
+        cellBounds.center = center;
+
+        bounds.Encapsulate(cellBounds);
     }
 
     void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3)
@@ -80,6 +97,75 @@ public class HexMesh : MonoBehaviour
         colors.Add(color);
         colors.Add(color);
         colors.Add(color);
+    }
+
+    void ComputeUVs()
+    {
+        uv.Clear();
+
+        for (int i = 0, count = vertices.Count; i < count; i++)
+        {
+            var v = vertices[i] - bounds.min;
+
+            uv.Add(new Vector2(v.x / bounds.size.x, v.z / bounds.size.z));
+        }
+    }
+
+    void SetCellCollor(HexCell cell, Color color)
+    {
+        cell.color = color;
+
+        for(int i = 0; i < 6*3; ++i)
+        {
+            colors[cell.firstVertex + i] = color;
+        }
+    }
+
+    void SetNeighborsColor(HexCell cell, Color color)
+    {
+        HexGrid grid = transform.parent.gameObject.GetComponent<HexGrid>();
+        List<HexCell> neighbors = grid.GetNeighbours(cell);
+
+        foreach (HexCell neighbour in neighbors)
+        {
+            neighbour.color = color;
+
+            SetCellCollor(neighbour, color);
+        }
+    }
+
+    void SelectCell(HexCell cell)
+    {
+        if (cell == selected)
+            return;
+
+        if (selected != null)
+        {
+            SetCellCollor(selected, selected.originalColor);
+            SetNeighborsColor(selected, selected.originalColor);
+        }
+        
+        selected = cell;
+
+        if (cell != null)
+        {
+            SetCellCollor(cell, HexCell.clickColor);
+            SetNeighborsColor(cell, HexCell.neighbourColor);
+        }
+    }
+
+    void SetHoverCell(HexCell cell)
+    {
+        if (cell == hoverCell)
+            return;
+
+        if(hoverCell != null)
+            SetCellCollor(hoverCell, hoverCell.originalColor);
+
+        hoverCell = cell;
+
+        if (cell != null)
+            SetCellCollor(cell, HexCell.hoverColor);
     }
 
     void OnMouseOver()
@@ -101,39 +187,31 @@ public class HexMesh : MonoBehaviour
                 if (cellDistance <= closest.distance)
                 {
                     // Update closest point
-                    {
-                        closest.cell.color = closest.cell.originalColor;
-                        closest.cell = cell;
-                        closest.distance = cellDistance;
-                    }
-
-                    if (Input.GetMouseButton(0))
-                    {
-                        cell.color = HexCell.clickColor;
-                    }
-                    else
-                    {
-                        cell.color = HexCell.hoverColor;
-                    } 
-                }
-                else
-                {
-                    cell.color = cell.originalColor;
+                    closest.cell.color = closest.cell.originalColor;
+                    closest.cell = cell;
+                    closest.distance = cellDistance;
                 }
             }
 
             if (Input.GetMouseButton(0))
             {
-                HexGrid grid = transform.parent.gameObject.GetComponent<HexGrid>();
-                List<HexCell> neighbors = grid.GetNeighbours(closest.cell);
-
-                foreach (HexCell neighbour in neighbors)
-                {
-                    neighbour.color = HexCell.neighbourColor;
-                }
+                SetHoverCell(null);
+                SelectCell(closest.cell);
             }
+            else
+            {
+                SelectCell(null);
+                SetHoverCell(closest.cell);
+            }
+            
+            hexMesh.colors = colors.ToArray();
+        }
+        else if((hoverCell != null) || (selected != null))
+        {
+            SetHoverCell(null);
+            SelectCell(null);
 
-            Triangulate(cells);
+            hexMesh.colors = colors.ToArray();
         }
     }
 }
