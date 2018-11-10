@@ -237,6 +237,9 @@ public class HexMesh : MonoBehaviour
         UpdateMeshColors();
     }
 
+    public HexCell higlightedCell
+    { get { return hoverCell; } }
+
     public void SelectCell(HexCell cell)
     {
         Debug.Assert(cell != null, "Invalid cell");

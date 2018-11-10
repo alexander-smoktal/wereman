@@ -162,6 +162,20 @@ public class HexGrid : MonoBehaviour {
         hexMesh.RemoveHiglighting();
     }
 
+    public Vector2Int higlightedCell
+    {
+        get
+        {
+            var cellIndex = new Vector2Int(-1, -1);
+
+            var cell = hexMesh.higlightedCell;
+            if (cell != null)
+                cellIndex = new Vector2Int(cell.column, cell.row);
+
+            return cellIndex;
+        }
+    }
+
     public void SelectCell(int column, int row)
     {
         int index = GetCellIndex(column, row);

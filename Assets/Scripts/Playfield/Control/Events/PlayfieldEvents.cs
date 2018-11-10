@@ -15,11 +15,15 @@ public class PlayfieldEvents : ControlEventsManager
         Count
     }
 
-    private PlayfieldMouseEvents m_MouseController = new PlayfieldMouseEvents();
+    private PlayfieldMouseEvents    m_MouseController    = new PlayfieldMouseEvents();
+    private PlayfieldKeyboardEvents m_KeyboardController = new PlayfieldKeyboardEvents();
+    private PlayfieldGamepadEvents  m_GamepadController  = new PlayfieldGamepadEvents();
 
     public PlayfieldEvents()
     {
         AddController(m_MouseController);
+        AddController(m_KeyboardController);
+        AddController(m_GamepadController);
     }
 
     private bool IsInRange(int _event)
@@ -35,5 +39,7 @@ public class PlayfieldEvents : ControlEventsManager
     public void SetPlayfieldComponent(HexGrid _playfieldComponent)
     {
         m_MouseController.SetPlayfieldComponent(_playfieldComponent);
+        m_KeyboardController.SetPlayfieldComponent(_playfieldComponent);
+        m_GamepadController.SetPlayfieldComponent(_playfieldComponent);
     }
 }
