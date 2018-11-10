@@ -111,8 +111,25 @@ public class HexMesh : MonoBehaviour
         }
     }
 
-    void SetCellCollor(HexCell cell, Color color)
+    void UpdateMeshColors()
     {
+        UpdateHoverColors();
+        UpdateSelectedColors();
+
+        hexMesh.SetColors(colors);
+    }
+
+    Color BlendColors(Color color0, Color color1)
+    {
+        Color blend = color0 + color1;
+        return blend;
+    }
+
+    void SetCellCollor(HexCell cell, Color color, bool blend = false)
+    {
+        if (blend)
+            color = BlendColors(cell.color, color);
+
         cell.color = color;
 
         for(int i = 0; i < 6*3; ++i)
@@ -121,7 +138,7 @@ public class HexMesh : MonoBehaviour
         }
     }
 
-    void SetNeighborsColor(HexCell cell, Color color)
+    void SetNeighborsColor(HexCell cell, Color color, bool blend = false)
     {
         HexGrid grid = transform.parent.gameObject.GetComponent<HexGrid>();
         List<HexCell> neighbors = grid.GetNeighbours(cell);
@@ -130,11 +147,11 @@ public class HexMesh : MonoBehaviour
         {
             neighbour.color = color;
 
-            SetCellCollor(neighbour, color);
+            SetCellCollor(neighbour, color, blend && (neighbour == hoverCell));
         }
     }
 
-    void SelectCell(HexCell cell)
+    void SetSelectedCell(HexCell cell)
     {
         if (cell == selected)
             return;
@@ -146,11 +163,14 @@ public class HexMesh : MonoBehaviour
         }
         
         selected = cell;
+    }
 
-        if (cell != null)
+    void UpdateSelectedColors()
+    {
+        if (selected != null)
         {
-            SetCellCollor(cell, HexCell.clickColor);
-            SetNeighborsColor(cell, HexCell.neighbourColor);
+            SetCellCollor(selected, HexCell.clickColor, (selected == hoverCell));
+            SetNeighborsColor(selected, HexCell.neighbourColor, true);
         }
     }
 
@@ -163,16 +183,19 @@ public class HexMesh : MonoBehaviour
             SetCellCollor(hoverCell, hoverCell.originalColor);
 
         hoverCell = cell;
-
-        if (cell != null)
-            SetCellCollor(cell, HexCell.hoverColor);
     }
 
-    void OnMouseOver()
+    void UpdateHoverColors()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
+        if (hoverCell != null)
+            SetCellCollor(hoverCell, HexCell.hoverColor);
+    }
 
+    public Vector2Int GetCell(Ray ray)
+    {
+        Vector2Int cellIndex = new Vector2Int(-1, -1);
+
+        RaycastHit hit;
         if (coll.Raycast(ray, out hit, 100.0f))
         {
             // Checking if point is inside the cell is hard op. We just find closest point
@@ -193,25 +216,39 @@ public class HexMesh : MonoBehaviour
                 }
             }
 
-            if (Input.GetMouseButton(0))
-            {
-                SetHoverCell(null);
-                SelectCell(closest.cell);
-            }
-            else
-            {
-                SelectCell(null);
-                SetHoverCell(closest.cell);
-            }
-            
-            hexMesh.colors = colors.ToArray();
+            cellIndex = new Vector2Int(closest.cell.column, closest.cell.row);
         }
-        else if((hoverCell != null) || (selected != null))
-        {
-            SetHoverCell(null);
-            SelectCell(null);
 
-            hexMesh.colors = colors.ToArray();
-        }
+        return cellIndex;
+    }
+    
+    public void HiglightCell(HexCell cell)
+    {
+        Debug.Assert(cell != null, "Invalid cell");
+        SetHoverCell(cell);
+
+        UpdateMeshColors();
+    }
+
+    public void RemoveHiglighting()
+    {
+        SetHoverCell(null);
+
+        UpdateMeshColors();
+    }
+
+    public void SelectCell(HexCell cell)
+    {
+        Debug.Assert(cell != null, "Invalid cell");
+        SetSelectedCell(cell);
+
+        UpdateMeshColors();
+    }
+
+    public void RemoveSelection()
+    {
+        SetSelectedCell(null);
+
+        UpdateMeshColors();
     }
 }

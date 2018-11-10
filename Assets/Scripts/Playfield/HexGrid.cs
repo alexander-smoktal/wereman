@@ -143,4 +143,35 @@ public class HexGrid : MonoBehaviour {
 
         return result;
     }
+
+    public Vector2Int GetCell(Ray ray)
+    {
+        return hexMesh.GetCell(ray);
+    }
+
+    public void HiglightCell(int column, int row)
+    {
+        int index = GetCellIndex(column, row);
+        HexCell cell = cells[index];
+
+        hexMesh.HiglightCell(cell);
+    }
+
+    public void RemoveHiglighting()
+    {
+        hexMesh.RemoveHiglighting();
+    }
+
+    public void SelectCell(int column, int row)
+    {
+        int index = GetCellIndex(column, row);
+        HexCell cell = cells[index];
+
+        hexMesh.SelectCell(cell);
+    }
+
+    public void RemoveSelection()
+    {
+        hexMesh.RemoveHiglighting();
+    }
 }
