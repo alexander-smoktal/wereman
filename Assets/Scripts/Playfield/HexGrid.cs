@@ -207,8 +207,8 @@ public class HexGrid : MonoBehaviour {
                     continue;
                 }
 
-                float tentative = closedSet[current] +
-                    Vector3.Distance(current.transform.position, neighbour.transform.position);
+                // This heuristics give better result than the original because of non-linear space
+                float tentative = Vector3.Distance(from.transform.position, neighbour.transform.position);
 
                 if (!openSet.ContainsKey(neighbour))
                 {
