@@ -46,6 +46,7 @@ public class HexGrid : MonoBehaviour {
     Canvas gridCanvas;
     HexMesh hexMesh;
     HexCell[] cells;
+    HexCell selectedCell;
 
     int GetCellIndex(int column, int row)
     {
@@ -143,6 +144,91 @@ public class HexGrid : MonoBehaviour {
 
         return result;
     }
+    // Reconstruct A* path
+    List<HexCell> ASReconstructPath(HexCell cell, Dictionary<HexCell, HexCell> cameFrom)
+    {
+        List<HexCell> result = new List<HexCell>();
+        result.Add(cell);
+
+        while (cameFrom.ContainsKey(cell))
+        {
+            cell = cameFrom[cell];
+            result.Add(cell);
+        }
+
+        return result;
+    }
+
+    // A*
+    public List<HexCell> MakePath(HexCell from, HexCell to)
+    {
+        Dictionary<HexCell, float> openSet = new Dictionary<HexCell, float>
+        {
+            { from, Vector3.Distance(from.transform.position, to.transform.position) }
+        };
+
+        Dictionary<HexCell, float> closedSet = new Dictionary<HexCell, float>
+        {
+            { from, 0 }
+        };
+
+        Dictionary<HexCell, HexCell> cameFrom = new Dictionary<HexCell, HexCell>();
+
+        while (openSet.Count > 0)
+        {
+            HexCell current = from;
+            float minDist = float.MaxValue;
+            // Find cell with min distance
+            foreach (KeyValuePair<HexCell, float> cell in openSet)
+            {
+                if (cell.Value < minDist)
+                {
+                    current = cell.Key;
+                    minDist = cell.Value;
+                }
+            }
+
+            if (current == to)
+            {
+                return ASReconstructPath(current, cameFrom);
+            }
+
+            openSet.Remove(current);
+
+            if (!closedSet.ContainsKey(current))
+            {
+                closedSet[current] = float.MaxValue;
+            }
+
+            foreach (HexCell neighbour in GetNeighbours(current))
+            {
+                if (!neighbour.IsPassable() || closedSet.ContainsKey(neighbour))
+                {
+                    continue;
+                }
+
+                float tentative = closedSet[current] +
+                    Vector3.Distance(current.transform.position, neighbour.transform.position);
+
+                if (!openSet.ContainsKey(neighbour))
+                {
+                    openSet.Add(neighbour, float.MaxValue);
+                }
+                else if (closedSet.ContainsKey(neighbour) &&
+                    tentative >= closedSet[neighbour])
+                {
+                    continue;
+                }
+
+                cameFrom[neighbour] = current;
+                closedSet[neighbour] = tentative;
+                openSet[neighbour] = tentative + Vector3.Distance(to.transform.position, neighbour.transform.position);
+            }
+        }
+
+        // Not found!
+        return new List<HexCell>();
+    }
 
     public Vector2Int GetCell(Ray ray)
     {
@@ -154,12 +240,37 @@ public class HexGrid : MonoBehaviour {
         int index = GetCellIndex(column, row);
         HexCell cell = cells[index];
 
-        hexMesh.HiglightCell(cell);
+        if (cell == selectedCell)
+        {
+            return;
+        }
+
+        RemoveSelection();
+
+        if (selectedCell)
+        {
+            List<HexCell> path = MakePath(selectedCell, cell);
+
+            // Remove active cell
+            if (path.Count > 0)
+            {
+                path.RemoveAt(path.Count - 1);
+            }
+            
+            foreach (HexCell pathCell in path)
+            {
+                pathCell.SetSprite(cell.pathSprite);
+            }
+        }
+
+        cell.SetSprite(cell.outlineSprite);
+        //hexMesh.HiglightCell(cell);
     }
 
     public void RemoveHiglighting()
     {
-        hexMesh.RemoveHiglighting();
+        RemoveSelection();
+        //hexMesh.RemoveHiglighting();
     }
 
     public Vector2Int higlightedCell
@@ -181,11 +292,23 @@ public class HexGrid : MonoBehaviour {
         int index = GetCellIndex(column, row);
         HexCell cell = cells[index];
 
-        hexMesh.SelectCell(cell);
+        selectedCell = cell;
+        cell.SetSprite(cell.activeSprite);
+        RemoveSelection();
+        //hexMesh.SelectCell();
     }
 
     public void RemoveSelection()
     {
-        hexMesh.RemoveHiglighting();
+        foreach (HexCell cell in cells)
+        {
+            cell.SetSprite(cell.defaultSprite);
+        }
+
+        if (selectedCell)
+        {
+            selectedCell.SetSprite(selectedCell.activeSprite);
+        }
+        // hexMesh.RemoveHiglighting();
     }
 }

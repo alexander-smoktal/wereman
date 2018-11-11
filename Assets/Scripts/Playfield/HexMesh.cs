@@ -160,6 +160,7 @@ public class HexMesh : MonoBehaviour
         {
             SetCellCollor(selected, selected.originalColor);
             SetNeighborsColor(selected, selected.originalColor);
+            selected.SetSprite(selected.defaultSprite);
         }
         
         selected = cell;

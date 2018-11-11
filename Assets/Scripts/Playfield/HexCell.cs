@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class HexCell : MonoBehaviour {
     static public Color clickColor = Color.red;
@@ -16,6 +17,16 @@ public class HexCell : MonoBehaviour {
     public int row;
     public int column;
     public int firstVertex;
+
+    public Sprite activeSprite;
+    public Sprite outlineSprite;
+    public Sprite pathSprite;
+    public Sprite defaultSprite;
+
+    void Awake()
+    {
+        defaultSprite = GetComponentInChildren<Image>().sprite;
+    }
 
     public static class Geometry {
 		public const float outerRadius = 10f;
@@ -39,5 +50,15 @@ public class HexCell : MonoBehaviour {
         Vector3 position = transform.position;
         return Math.Abs(position.x - point.x) < Geometry.innerRadius
             && Math.Abs(position.y - point.y) < Geometry.innerRadius;
+    }
+
+    public void SetSprite(Sprite sprite)
+    {
+        GetComponentInChildren<Image>().sprite = sprite;
+    }
+
+    public bool IsPassable()
+    {
+        return true;
     }
 }
