@@ -23,8 +23,20 @@ public class HexCell : MonoBehaviour {
     public Sprite pathSprite;
     public Sprite defaultSprite;
 
+    public CellType type;
+
     void Awake()
     {
+        int val = (int) (UnityEngine.Random.value * 100);
+        if (val % 10 == 0)
+        {
+            type = new CellTypeRock();
+        }
+        else
+        {
+            type = new CellTypeSand();
+        }
+        SetSprite(type.GetSprite());
         defaultSprite = GetComponentInChildren<Image>().sprite;
     }
 
@@ -59,6 +71,6 @@ public class HexCell : MonoBehaviour {
 
     public bool IsPassable()
     {
-        return true;
+        return type.IsPassable();
     }
 }

@@ -208,7 +208,8 @@ public class HexGrid : MonoBehaviour {
                 }
 
                 // This heuristics give better result than the original because of non-linear space
-                float tentative = Vector3.Distance(from.transform.position, neighbour.transform.position);
+                float tentative = closedSet[current] +
+                    Vector3.Distance(current.transform.position, neighbour.transform.position);
 
                 if (!openSet.ContainsKey(neighbour))
                 {
@@ -263,7 +264,16 @@ public class HexGrid : MonoBehaviour {
             }
         }
 
-        cell.SetSprite(cell.outlineSprite);
+        if (cell.IsPassable())
+        {
+            GetComponentInChildren<CursorManager>().SetCursor(CursorManager.CursorType.Walk);
+            cell.SetSprite(cell.outlineSprite);
+        }
+        else
+        {
+            GetComponentInChildren<CursorManager>().SetCursor(CursorManager.CursorType.Stop);
+        }
+        
         //hexMesh.HiglightCell(cell);
     }
 
