@@ -1,42 +1,35 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public interface CellType
+public class CellType
 {
-    bool IsPassable();
-    Sprite GetSprite();
-}
-
-public class CellTypeSand : CellType
-{
-    static Sprite sprite;
-
-    public bool IsPassable() { return true; }
-    public Sprite GetSprite()
+    [Flags]
+    public enum Type
     {
-        if (!sprite)
-        {
-            sprite = Resources.Load<Sprite>("Sprites/CellTypes/SandTexture");
-        }
-
-        return sprite;
+        None = 0,
+        Sand = 1,
+        Grass = 1 << 1,
+        Dirt = 1 << 2,
+        Stone = 1 << 4,
     }
-}
 
-public class CellTypeRock : CellType
-{
-    static Sprite sprite;
+    Type type;
 
-    public bool IsPassable() { return false; }
-    public Sprite GetSprite()
+    public CellType(Type type)
     {
-        if (!sprite)
-        {
-            sprite = Resources.Load<Sprite>("Sprites/CellTypes/StoneTexture");
-        }
+        this.type = type;
+    }
 
-        return sprite;
+    public Type Get()
+    {
+        return type;
+    }
+
+    public bool IsPassable()
+    {
+        return (type & Type.Stone) == Type.None;
     }
 }

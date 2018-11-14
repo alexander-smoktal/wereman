@@ -160,7 +160,7 @@ public class HexMesh : MonoBehaviour
         {
             SetCellCollor(selected, selected.originalColor);
             SetNeighborsColor(selected, selected.originalColor);
-            selected.SetSprite(selected.defaultSprite);
+            selected.Clear();
         }
         
         selected = cell;
@@ -223,21 +223,6 @@ public class HexMesh : MonoBehaviour
         return cellIndex;
     }
     
-    public void HiglightCell(HexCell cell)
-    {
-        Debug.Assert(cell != null, "Invalid cell");
-        SetHoverCell(cell);
-
-        UpdateMeshColors();
-    }
-
-    public void RemoveHiglighting()
-    {
-        SetHoverCell(null);
-
-        UpdateMeshColors();
-    }
-
     public HexCell higlightedCell
     { get { return hoverCell; } }
 

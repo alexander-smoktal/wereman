@@ -5,11 +5,16 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class HexCell : MonoBehaviour {
+    [Header("Painter")]
+    public CellPainter painterPrefab;
+
+    [Header("Colors")]
     static public Color clickColor = Color.red;
     static public Color defaultColor = Color.white;
     static public Color hoverColor = Color.magenta;
     static public Color neighbourColor = Color.green;
 
+    [Header("Global settings")]
     public HexCoordinates coordinates;
     public Color color;
     // Original cell color. Should be changed to cell type color
@@ -18,26 +23,28 @@ public class HexCell : MonoBehaviour {
     public int column;
     public int firstVertex;
 
+    [Header("Path drawing sprites")]
     public Sprite activeSprite;
     public Sprite outlineSprite;
     public Sprite pathSprite;
-    public Sprite defaultSprite;
 
-    public CellType type;
+    CellType type;
+    CellPainter painter;
 
     void Awake()
     {
         int val = (int) (UnityEngine.Random.value * 100);
         if (val % 10 == 0)
         {
-            type = new CellTypeRock();
+            type = new CellType(CellType.Type.Sand | CellType.Type.Stone);
         }
         else
         {
-            type = new CellTypeSand();
+            type = new CellType(CellType.Type.Sand);
         }
-        SetSprite(type.GetSprite());
-        defaultSprite = GetComponentInChildren<Image>().sprite;
+        painter = Instantiate(painterPrefab);
+        painter.Init(type);
+        painter.transform.SetParent(transform, false);
     }
 
     public static class Geometry {
@@ -64,13 +71,18 @@ public class HexCell : MonoBehaviour {
             && Math.Abs(position.y - point.y) < Geometry.innerRadius;
     }
 
-    public void SetSprite(Sprite sprite)
-    {
-        GetComponentInChildren<Image>().sprite = sprite;
-    }
-
     public bool IsPassable()
     {
         return type.IsPassable();
+    }
+
+    public void Draw(Sprite sprite)
+    {
+        painter.Draw(sprite);
+    }
+
+    public void Clear()
+    {
+        painter.Clear();
     }
 }

@@ -33,10 +33,10 @@ public class CursorManager : MonoBehaviour {
         switch (type)
         {
             case CursorType.Walk:
-                Cursor.SetCursor(walkCursor, Vector2.zero, CursorMode.Auto);
+                Cursor.SetCursor(walkCursor, new Vector2(32, 32), CursorMode.Auto);
                 break;
             case CursorType.Stop:
-                Cursor.SetCursor(stopCursor, Vector2.zero, CursorMode.Auto);
+                Cursor.SetCursor(stopCursor, new Vector2(32, 32), CursorMode.Auto);
                 break;
         }
         

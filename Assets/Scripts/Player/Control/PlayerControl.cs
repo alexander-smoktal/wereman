@@ -7,10 +7,9 @@ public class PlayerControl : PlayerControlBase
     #region Serializable
     [Header("Movements")]
     [SerializeField] float m_LocomotionWalkSpeed     = 1.0f;
-    [SerializeField] float m_RotationHorizontalSpeed = 1.0f;
 
     [Header("Camera")]
-    [SerializeField] Camera m_Camera = null;
+    //[SerializeField] Camera m_Camera = null;
     #endregion
 
     #region Members

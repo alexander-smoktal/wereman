@@ -5,9 +5,9 @@ using UnityEngine;
 public class PlayerComponent : MonoBehaviour
 {
     [Header("Dependencies")]
-    [SerializeField] private Camera m_Camera = null;
+    // [SerializeField] private Camera m_Camera = null;
 
-    private PlayerControl m_Control = null;
+    // private PlayerControl m_Control = null;
     private HealthComponent m_Health = null;
 
     void Start()
@@ -17,7 +17,7 @@ public class PlayerComponent : MonoBehaviour
 
     private void Init()
     {
-        m_Control = GetComponent<PlayerControl>();
+        // m_Control = GetComponent<PlayerControl>();
         m_Health = GetComponent<HealthComponent>();
     }
 

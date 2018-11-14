@@ -260,14 +260,15 @@ public class HexGrid : MonoBehaviour {
             
             foreach (HexCell pathCell in path)
             {
-                pathCell.SetSprite(cell.pathSprite);
+                pathCell.Draw(cell.pathSprite);
             }
         }
 
         if (cell.IsPassable())
         {
             GetComponentInChildren<CursorManager>().SetCursor(CursorManager.CursorType.Walk);
-            cell.SetSprite(cell.outlineSprite);
+            cell.Clear();
+            cell.Draw(cell.outlineSprite);
         }
         else
         {
@@ -302,8 +303,13 @@ public class HexGrid : MonoBehaviour {
         int index = GetCellIndex(column, row);
         HexCell cell = cells[index];
 
+        if (!cell.IsPassable())
+        {
+            return;
+        }
+
         selectedCell = cell;
-        cell.SetSprite(cell.activeSprite);
+        cell.Draw(cell.activeSprite);
         RemoveSelection();
         //hexMesh.SelectCell();
     }
@@ -312,12 +318,12 @@ public class HexGrid : MonoBehaviour {
     {
         foreach (HexCell cell in cells)
         {
-            cell.SetSprite(cell.defaultSprite);
+            cell.Clear();
         }
 
         if (selectedCell)
         {
-            selectedCell.SetSprite(selectedCell.activeSprite);
+            selectedCell.Draw(selectedCell.activeSprite);
         }
         // hexMesh.RemoveHiglighting();
     }
