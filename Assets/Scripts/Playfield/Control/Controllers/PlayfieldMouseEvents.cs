@@ -30,8 +30,17 @@ public class PlayfieldMouseEvents : ControllerEventBase
     {
         Debug.Assert(m_PlayfieldComponent != null, "Invalid palyfield component");
 
-        UpdateMovement();
-        UpdateActions();
+        bool isOverUI = UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+
+        if (!isOverUI)
+        {
+            UpdateMovement();
+            UpdateActions();
+        }
+        else
+        {
+            SetEvent(PlayfieldEvents.InputEvents.CursorOverUI);
+        }
     }
 
     private void UpdateMovement()

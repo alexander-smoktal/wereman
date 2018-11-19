@@ -66,6 +66,7 @@ public class PlayfieldControl : PlayfieldControlBase
         {
             UpdateMovement();
             UpdateActions();
+            UpdateUI();
         }
     }
 
@@ -102,5 +103,11 @@ public class PlayfieldControl : PlayfieldControlBase
         else
             m_PlayfieldComponent.RemoveSelection();
     }
-    #endregion
-}
+
+    private void UpdateUI()
+    {
+        if (PlayfieldEvents.HasEvent(PlayfieldEvents.InputEvents.CursorOverUI))
+            m_PlayfieldComponent.OverUI();
+    }
+        #endregion
+    }

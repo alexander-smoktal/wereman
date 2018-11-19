@@ -236,6 +236,11 @@ public class HexGrid : MonoBehaviour {
         return hexMesh.GetCell(ray);
     }
 
+    public void OverUI()
+    {
+        GetComponentInChildren<CursorManager>().SetCursor(CursorManager.CursorType.Arrow);
+    }
+
     public void HiglightCell(int column, int row)
     {
         int index = GetCellIndex(column, row);

@@ -2,16 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
-
-public class CursorManager : MonoBehaviour {
+public class CursorManager : MonoBehaviour
+{
     public enum CursorType
     {
+        Arrow,
         Walk,
         Stop
     }
 
     CursorType currentCursor;
+    public Texture2D arrowCursor;
     public Texture2D walkCursor;
     public Texture2D stopCursor;
 
@@ -32,6 +33,9 @@ public class CursorManager : MonoBehaviour {
 
         switch (type)
         {
+            case CursorType.Arrow:
+                Cursor.SetCursor(arrowCursor, new Vector2(0, 0), CursorMode.Auto);
+                break;
             case CursorType.Walk:
                 Cursor.SetCursor(walkCursor, new Vector2(32, 32), CursorMode.Auto);
                 break;
