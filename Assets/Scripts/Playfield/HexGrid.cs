@@ -332,4 +332,20 @@ public class HexGrid : MonoBehaviour {
         }
         // hexMesh.RemoveHiglighting();
     }
+
+    #region Editor
+    public void SetEditorSelection(int column, int row)
+    {
+        // TO DO - Higlight selected cells
+    }
+
+    public void SetCellProperties(int column, int row, InGameEditor.Properties editorProperties)
+    {
+        int index = GetCellIndex(column, row);
+        HexCell cell = cells[index];
+
+        CellType.Type cellType = editorProperties.GetCellType();
+        cell.SetType(cellType);
+    }
+    #endregion
 }

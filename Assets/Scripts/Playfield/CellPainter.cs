@@ -20,6 +20,8 @@ public class CellPainter : MonoBehaviour {
 
     public void Init(CellType cellType)
     {
+        ClearRenderer();
+
         if ((cellType.Get() & CellType.Type.Sand) != CellType.Type.None)
         {
             staticSprites.Add(sandBackground);
@@ -43,6 +45,19 @@ public class CellPainter : MonoBehaviour {
             renderer.SetSprite(sprite, ++order);
             renderers.Add(renderer);
         }
+    }
+
+    void ClearRenderer()
+    {
+        foreach (CellSpriteRenderer renderer in renderers)
+        {
+            Destroy(renderer.gameObject);
+        }
+
+        staticSprites.Clear();
+        renderers.Clear();
+
+        order = 0;
     }
 
     // Use this for initialization

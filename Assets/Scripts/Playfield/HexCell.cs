@@ -85,4 +85,13 @@ public class HexCell : MonoBehaviour {
     {
         painter.Clear();
     }
+
+    public void SetType(CellType.Type cellType)
+    {
+        if (type.Get() != cellType)
+        {
+            type = new CellType(cellType);
+            painter.Init(type);
+        }
+    }
 }

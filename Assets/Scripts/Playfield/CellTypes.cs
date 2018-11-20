@@ -9,11 +9,11 @@ public class CellType
     [Flags]
     public enum Type
     {
-        None = 0,
-        Sand = 1,
+        None  = 0,
+        Sand  = 1,
         Grass = 1 << 1,
-        Dirt = 1 << 2,
-        Stone = 1 << 4,
+        Dirt  = 1 << 2,
+        Stone = 1 << 3,
     }
 
     Type type;

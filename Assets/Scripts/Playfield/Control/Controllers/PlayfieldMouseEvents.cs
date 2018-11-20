@@ -39,30 +39,50 @@ public class PlayfieldMouseEvents : ControllerEventBase
         }
         else
         {
-            SetEvent(PlayfieldEvents.InputEvents.CursorOverUI);
+            UpdateMovementUI();
         }
+    }
+
+    private bool UpdateMousePosition(out Vector3 mousePosition)
+    {
+        mousePosition = Input.mousePosition;
+
+        // Check if mouse has moved
+        if (m_PrevMousePosition == mousePosition)
+            return false;
+
+        m_PrevMousePosition = mousePosition;
+
+        return true;
     }
 
     private void UpdateMovement()
     {
-        var mousePosition = Input.mousePosition;
+        Vector3 mousePosition;
 
-        // Check if mouse has moved
-        if (m_PrevMousePosition == mousePosition)
-            return;
+        if (UpdateMousePosition(out mousePosition))
+        {
+            Ray ray = Camera.main.ScreenPointToRay(mousePosition);
+            var cellIndex = m_PlayfieldComponent.GetCell(ray);
 
-        m_PrevMousePosition = mousePosition;
-
-        Ray ray = Camera.main.ScreenPointToRay(mousePosition);
-        var cellIndex = m_PlayfieldComponent.GetCell(ray);
-
-        SetEvent(PlayfieldEvents.InputEvents.CursorMove, cellIndex);
+            SetEvent(PlayfieldEvents.InputEvents.CursorMove, cellIndex);
+        }
     }
 
     private void UpdateActions()
     {
         if (Input.GetMouseButtonDown(0))
             SetEvent(PlayfieldEvents.InputEvents.Select);
+    }
+
+    private void UpdateMovementUI()
+    {
+        Vector3 mousePosition;
+
+        if (UpdateMousePosition(out mousePosition))
+        {
+            SetEvent(PlayfieldEvents.InputEvents.CursorMoveOverUI);
+        }
     }
     #endregion
 }

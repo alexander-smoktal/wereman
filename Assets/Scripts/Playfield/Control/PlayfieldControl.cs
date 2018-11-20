@@ -8,9 +8,14 @@ public class PlayfieldControl : PlayfieldControlBase
     private bool m_IsPaused = false;
     private bool m_PrevPaused = false;
 
+    private bool m_IsCursorOverUI = false;
+
     private HexGrid m_PlayfieldComponent = null;
 
     private Vector2Int m_CurrentCell = new Vector2Int(-1, -1);
+
+    private bool                    m_Edit = false;
+    private InGameEditor.Properties m_EditorProperties;
     #endregion
 
     #region MonoBehaviour
@@ -56,6 +61,46 @@ public class PlayfieldControl : PlayfieldControlBase
     }
     #endregion
 
+    #region Editor Properties
+    public void SetEditMode(bool edit)
+    {
+        m_Edit = edit;
+    }
+
+    public void SetEditorProperties(InGameEditor.Properties editorProperties)
+    {
+        m_EditorProperties = editorProperties;
+    }
+    #endregion
+
+    #region Editor Controls
+    private void EditCells()
+    {
+        EditorUpdateSelection();
+        EditorUpdateCell();
+    }
+
+    private void EditorUpdateSelection()
+    {
+        if (!PlayfieldEvents.HasEvent(PlayfieldEvents.InputEvents.CursorMove))
+            return;
+
+        m_CurrentCell = (Vector2Int)PlayfieldEvents.GetEvent(PlayfieldEvents.InputEvents.CursorMove);
+
+        if (IsValidCell(m_CurrentCell))
+            m_PlayfieldComponent.SetEditorSelection(m_CurrentCell.x, m_CurrentCell.y);
+    }
+
+    private void EditorUpdateCell()
+    {
+        if (!PlayfieldEvents.HasEvent(PlayfieldEvents.InputEvents.Select))
+            return;
+
+        if (IsValidCell(m_CurrentCell))
+            m_PlayfieldComponent.SetCellProperties(m_CurrentCell.x, m_CurrentCell.y, m_EditorProperties);
+    }
+    #endregion
+
     #region Controls
     protected override void UpdateControl()
     {
@@ -64,9 +109,16 @@ public class PlayfieldControl : PlayfieldControlBase
 
         if (PlayfieldEvents.HasEvents)
         {
-            UpdateMovement();
-            UpdateActions();
-            UpdateUI();
+            if (m_Edit)
+            {
+                EditCells();
+            }
+            else
+            {
+                UpdateMovement();
+                UpdateActions();
+                UpdateUI();
+            }
         }
     }
 
@@ -106,8 +158,15 @@ public class PlayfieldControl : PlayfieldControlBase
 
     private void UpdateUI()
     {
-        if (PlayfieldEvents.HasEvent(PlayfieldEvents.InputEvents.CursorOverUI))
+        bool isOverUI = PlayfieldEvents.HasEvent(PlayfieldEvents.InputEvents.CursorMoveOverUI);
+
+        if (isOverUI && !m_IsCursorOverUI)
+        {
+            m_PlayfieldComponent.RemoveHiglighting();
             m_PlayfieldComponent.OverUI();
+        }
+
+        m_IsCursorOverUI = isOverUI;
     }
-        #endregion
-    }
+    #endregion
+}

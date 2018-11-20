@@ -11,7 +11,7 @@ public class PlayfieldEvents : ControlEventsManager
         
         CursorMove,
         Select,
-        CursorOverUI,
+        CursorMoveOverUI,
 
         Count
     }
