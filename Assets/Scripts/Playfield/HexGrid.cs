@@ -36,7 +36,10 @@ public struct HexCoordinates
     }
 }
 
-public class HexGrid : MonoBehaviour {
+public class HexGrid : MonoBehaviour
+{
+    [SerializeField] private TextAsset mapAsset = null;
+
     public int width = 6;
     public int height = 6;
 
@@ -48,9 +51,38 @@ public class HexGrid : MonoBehaviour {
     HexCell[] cells;
     HexCell selectedCell;
 
+    MapSerializer mapSerializer = null;
+
     int GetCellIndex(int column, int row)
     {
         return row * width + column;
+    }
+
+    void LoadMap()
+    {
+        if(mapAsset != null)
+        {
+            mapSerializer = new MapSerializer();
+            mapSerializer.Load(mapAsset);
+        }
+    }
+
+    void SaveMap()
+    {
+        if (mapAsset != null)
+        {
+            mapSerializer = new MapSerializer(width, height);
+
+            for (int row = 0; row < height; row++)
+            {
+                for (int column = 0; column < width; column++)
+                {
+                    // TO DO: fill mapSerializer
+                }
+            }
+
+            mapSerializer.Save(mapAsset);
+        }
     }
 
     void Start()
@@ -60,6 +92,8 @@ public class HexGrid : MonoBehaviour {
 
     void Awake()
     {
+        LoadMap();
+
         gridCanvas = GetComponentInChildren<Canvas>();
         hexMesh = GetComponentInChildren<HexMesh>();
 
@@ -72,6 +106,8 @@ public class HexGrid : MonoBehaviour {
                 CreateCell(column, row);
             }
         }
+
+        mapSerializer = null;
     }
 
     void CreateCell(int column, int row)

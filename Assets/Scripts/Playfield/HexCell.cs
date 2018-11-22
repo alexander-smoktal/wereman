@@ -28,20 +28,24 @@ public class HexCell : MonoBehaviour {
     public Sprite outlineSprite;
     public Sprite pathSprite;
 
-    CellType type;
-    CellPainter painter;
+    CellType type = null;
+    CellPainter painter = null;
 
     void Awake()
     {
-        int val = (int) (UnityEngine.Random.value * 100);
-        if (val % 10 == 0)
+        if (type == null)
         {
-            type = new CellType(CellType.Type.Sand | CellType.Type.Stone);
+            int val = (int)(UnityEngine.Random.value * 100);
+            if (val % 10 == 0)
+            {
+                type = new CellType(CellType.Type.Sand | CellType.Type.Stone);
+            }
+            else
+            {
+                type = new CellType(CellType.Type.Sand);
+            }
         }
-        else
-        {
-            type = new CellType(CellType.Type.Sand);
-        }
+
         painter = Instantiate(painterPrefab);
         painter.Init(type);
         painter.transform.SetParent(transform, false);
@@ -88,10 +92,12 @@ public class HexCell : MonoBehaviour {
 
     public void SetType(CellType.Type cellType)
     {
-        if (type.Get() != cellType)
+        if ((type == null) || (type.Get() != cellType))
         {
             type = new CellType(cellType);
-            painter.Init(type);
+
+            if(painter != null)
+                painter.Init(type);
         }
     }
 }
