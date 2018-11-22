@@ -50,40 +50,165 @@ public class MapSerializer
     }
     #endregion
 
-    #region Serialization
-    private string GetDataPath()
+    #region Values
+    private int GetCellIndex(int column, int row)
     {
-        string dataPath = Application.dataPath;
-
-        int prefixIndex = dataPath.Length - c_DataPathAssets.Length;
-        string prefix = dataPath.Substring(prefixIndex);
-
-        if(prefix == c_DataPathAssets)
-            return dataPath.Substring(0, prefixIndex);
-
-        return dataPath;
+        return row * m_Width + column;
     }
 
+    public void SetValue(int column, int row, InGameEditor.Properties cell)
+    {
+        int index = GetCellIndex(column, row);
+
+        m_CellsProperties[index] = cell;
+    }
+
+    public InGameEditor.Properties GetValue(int column, int row)
+    {
+        bool invalidColumn = (column < 0) || (column > m_Width);
+        bool invalidRow    = (row < 0) || (row > m_Height);
+
+        if(invalidColumn || invalidRow)
+        {
+            InGameEditor.Properties emptyCell = new InGameEditor.Properties
+                {
+                    groundType = InGameEditor.GroundType.Invalid,
+                    stone = false,
+                };
+
+            return emptyCell;
+        }
+
+        int index = GetCellIndex(column, row);
+
+        return m_CellsProperties[index];
+    }
+    #endregion
+
+    #region Serialization
     public void Save(TextAsset mapAsset)
     {
-        string assetPath = GetDataPath() + Path.AltDirectorySeparatorChar + AssetDatabase.GetAssetPath(mapAsset);
+        string assetPath = AssetDatabase.GetAssetPath(mapAsset);
         SaveToFile(assetPath);
     }
 
     public void Load(TextAsset mapAsset)
     {
-        Debug.Assert(mapAsset.bytes != null, "Non binary text asset");
-        LoadFromBytes(mapAsset.bytes);
+        // Asset doesn't reload immediately after saving.
+        // Load via file stream in editor as workaround
+        if (Application.isEditor)
+        {
+            string assetPath = AssetDatabase.GetAssetPath(mapAsset);
+            LoadFromFile(assetPath);
+        }
+        else
+        {
+            LoadFromBytes(mapAsset.bytes);
+        }
+    }
+
+    public bool IsInitialized()
+    {
+        return m_CellsProperties != null;
     }
 
     private void SaveToFile(string path)
     {
+        FileStream fileStream = new FileStream(path, FileMode.Truncate);
+        BinaryWriter binaryWriter = new BinaryWriter(fileStream);
 
+        SaveMap(binaryWriter);
+
+        binaryWriter.Close();
+        fileStream.Close();
+    }
+
+    private void SaveMap(BinaryWriter binaryWriter)
+    {
+        SavePrefix(binaryWriter);
+        SaveCells(binaryWriter);
+    }
+
+    private void SavePrefix(BinaryWriter binaryWriter)
+    {
+        binaryWriter.Write(m_Width);
+        binaryWriter.Write(m_Height);
+    }
+
+    private void SaveCells(BinaryWriter binaryWriter)
+    {
+        for (int i = 0; i < m_CellsProperties.Length; ++i)
+        {
+            SaveCell(binaryWriter, m_CellsProperties[i]);
+        }
+    }
+
+    private void SaveCell(BinaryWriter binaryWriter, InGameEditor.Properties cell)
+    {
+        int groundType = (int)cell.groundType;
+
+        binaryWriter.Write(groundType);
+        binaryWriter.Write(cell.stone);
     }
 
     private void LoadFromBytes(byte[] bytesArray)
     {
+        if (bytesArray.Length == 0)
+        {
+            Debug.LogWarning("Empty map file");
+            return;
+        }
 
+        MemoryStream memoryStream = new MemoryStream(bytesArray);
+        BinaryReader binaryReader = new BinaryReader(memoryStream);
+
+        LoadMap(binaryReader);
+
+        binaryReader.Close();
+        memoryStream.Close();
+    }
+
+    private void LoadFromFile(string path)
+    {
+        FileStream fileStream = new FileStream(path, FileMode.Open);
+        BinaryReader binaryReader = new BinaryReader(fileStream);
+
+        LoadMap(binaryReader);
+
+        binaryReader.Close();
+        fileStream.Close();
+    }
+
+    private void LoadMap(BinaryReader binaryReader)
+    {
+        LoadPrefix(binaryReader);
+        LoadCells(binaryReader);
+    }
+
+    private void LoadPrefix(BinaryReader binaryReader)
+    {
+        int width  = binaryReader.ReadInt32();
+        int height = binaryReader.ReadInt32();
+
+        Resize(width, height);
+    }
+
+    private void LoadCells(BinaryReader binaryReader)
+    {
+        for(int i = 0; i < m_CellsProperties.Length; ++i)
+        {
+            m_CellsProperties[i] = LoadCell(binaryReader);
+        }
+    }
+
+    private InGameEditor.Properties LoadCell(BinaryReader binaryReader)
+    {
+        InGameEditor.Properties cell;
+
+        cell.groundType = (InGameEditor.GroundType)binaryReader.ReadInt32();
+        cell.stone      = binaryReader.ReadBoolean();
+
+        return cell;
     }
     #endregion
 }

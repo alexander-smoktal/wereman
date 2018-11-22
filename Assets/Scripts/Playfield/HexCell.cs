@@ -90,6 +90,11 @@ public class HexCell : MonoBehaviour {
         painter.Clear();
     }
 
+    new public CellType.Type GetType()
+    {
+        return type.Get();
+    }
+
     public void SetType(CellType.Type cellType)
     {
         if ((type == null) || (type.Get() != cellType))

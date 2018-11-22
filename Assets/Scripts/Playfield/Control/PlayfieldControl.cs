@@ -71,6 +71,11 @@ public class PlayfieldControl : PlayfieldControlBase
     {
         m_EditorProperties = editorProperties;
     }
+
+    public void SaveMap()
+    {
+        m_PlayfieldComponent.SaveMap();
+    }
     #endregion
 
     #region Editor Controls

@@ -8,6 +8,7 @@ public class InGameEditor : MonoBehaviour
     #region Types
     public enum GroundType
     {
+        Invalid,
         Sand,
         Grass,
         Dirt,
@@ -33,6 +34,24 @@ public class InGameEditor : MonoBehaviour
                 type = type | CellType.Type.Stone;
 
             return type;
+        }
+
+        public void SetCellType(CellType.Type cellType)
+        {
+            if ((cellType & CellType.Type.Sand) != 0)
+                groundType = GroundType.Sand;
+            else if ((cellType & CellType.Type.Grass) != 0)
+                groundType = GroundType.Grass;
+            else if ((cellType & CellType.Type.Dirt) != 0)
+                groundType = GroundType.Dirt;
+            else
+            {
+                Debug.Assert(false, "Invalid ground type");
+                groundType = GroundType.Invalid;
+
+            }
+
+            stone = (cellType & CellType.Type.Stone) != 0;
         }
     }
     #endregion
@@ -89,6 +108,12 @@ public class InGameEditor : MonoBehaviour
     #endregion
 
     #region Callbacks
+    public void OnSaveMap()
+    {
+        if (m_PlayfieldControl != null)
+            m_PlayfieldControl.SaveMap();
+    }
+
     public void OnIsEdit(bool isEdit)
     {
         m_IsEdit = isEdit;

@@ -64,11 +64,17 @@ public class HexGrid : MonoBehaviour
         {
             mapSerializer = new MapSerializer();
             mapSerializer.Load(mapAsset);
+
+            if(!mapSerializer.IsInitialized())
+                Debug.LogWarning("Failde to load map");
+            else if ((mapSerializer.Width != width) || (mapSerializer.Height != height))
+                Debug.LogWarning("Loaded map is incompatible");
         }
     }
 
-    void SaveMap()
+    public void SaveMap()
     {
+        Debug.Assert((mapAsset != null), "Invalid map asset");
         if (mapAsset != null)
         {
             mapSerializer = new MapSerializer(width, height);
@@ -77,7 +83,13 @@ public class HexGrid : MonoBehaviour
             {
                 for (int column = 0; column < width; column++)
                 {
-                    // TO DO: fill mapSerializer
+                    int index = GetCellIndex(column, row);
+                    HexCell cell = cells[index];
+
+                    InGameEditor.Properties cellProperties = new InGameEditor.Properties();
+                    cellProperties.SetCellType(cell.GetType());
+
+                    mapSerializer.SetValue(column, row, cellProperties);
                 }
             }
 
@@ -93,6 +105,7 @@ public class HexGrid : MonoBehaviour
     void Awake()
     {
         LoadMap();
+        bool isLoaded = (mapSerializer != null) && mapSerializer.IsInitialized();
 
         gridCanvas = GetComponentInChildren<Canvas>();
         hexMesh = GetComponentInChildren<HexMesh>();
@@ -103,14 +116,14 @@ public class HexGrid : MonoBehaviour
         {
             for (int column = 0; column < width; column++)
             {
-                CreateCell(column, row);
+                CreateCell(column, row, isLoaded);
             }
         }
 
         mapSerializer = null;
     }
 
-    void CreateCell(int column, int row)
+    void CreateCell(int column, int row, bool load)
     {
         Vector3 position;
         position.x = (column + row * 0.5f - row / 2) * (HexCell.Geometry.innerRadius * 2f);
@@ -124,6 +137,12 @@ public class HexGrid : MonoBehaviour
         cell.color = HexCell.defaultColor;
         cell.row = row;
         cell.column = column;
+
+        if(load)
+        {
+            InGameEditor.Properties cellProperties = mapSerializer.GetValue(column, row);
+            cell.SetType(cellProperties.GetCellType());
+        }
 
         Text label = Instantiate<Text>(cellLabelPrefab);
         label.rectTransform.SetParent(gridCanvas.transform, false);
