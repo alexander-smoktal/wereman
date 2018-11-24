@@ -6,6 +6,8 @@ using UnityEngine.UI;
 public class CellPainter : MonoBehaviour {
     [Header("Cell backgrounds")]
     public Sprite sandBackground;
+    public Sprite grassBackground;
+    public Sprite dirtBackground;
     public Sprite stone;
 
     List<Sprite> staticSprites = new List<Sprite>();
@@ -22,12 +24,20 @@ public class CellPainter : MonoBehaviour {
     {
         ClearRenderer();
 
-        if ((cellType.Get() & CellType.Type.Sand) != CellType.Type.None)
+        if (cellType.IsContains(CellType.Type.Sand))
         {
             staticSprites.Add(sandBackground);
         }
+        else if(cellType.IsContains(CellType.Type.Grass))
+        {
+            staticSprites.Add(grassBackground);
+        }
+        else if (cellType.IsContains(CellType.Type.Dirt))
+        {
+            staticSprites.Add(dirtBackground);
+        }
 
-        if ((cellType.Get() & CellType.Type.Stone) != CellType.Type.None)
+        if (cellType.IsContains(CellType.Type.Stone))
         {
             staticSprites.Add(stone);
         }

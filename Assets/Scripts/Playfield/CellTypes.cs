@@ -23,6 +23,11 @@ public class CellType
         this.type = type;
     }
 
+    public bool IsContains(Type cellType)
+    {
+        return (type & cellType) != Type.None;
+    }
+
     public Type Get()
     {
         return type;
