@@ -66,7 +66,7 @@ public class HexGrid : MonoBehaviour
             mapSerializer.Load(mapAsset);
 
             if(!mapSerializer.IsInitialized())
-                Debug.LogWarning("Failde to load map");
+                Debug.LogWarning("Failed to load map");
             else if ((mapSerializer.Width != width) || (mapSerializer.Height != height))
                 Debug.LogWarning("Loaded map is incompatible");
         }
@@ -86,8 +86,8 @@ public class HexGrid : MonoBehaviour
                     int index = GetCellIndex(column, row);
                     HexCell cell = cells[index];
 
-                    InGameEditor.Properties cellProperties = new InGameEditor.Properties();
-                    cellProperties.SetCellType(cell.GetType());
+                    MapSerializer.CellProperties cellProperties = new MapSerializer.CellProperties();
+                    cellProperties.m_Type = cell.GetType();
 
                     mapSerializer.SetValue(column, row, cellProperties);
                 }
@@ -140,8 +140,8 @@ public class HexGrid : MonoBehaviour
 
         if(load)
         {
-            InGameEditor.Properties cellProperties = mapSerializer.GetValue(column, row);
-            cell.SetType(cellProperties.GetCellType());
+            MapSerializer.CellProperties cellProperties = mapSerializer.GetValue(column, row);
+            cell.SetType(cellProperties.m_Type);
         }
 
         Text label = Instantiate<Text>(cellLabelPrefab);

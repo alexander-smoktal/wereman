@@ -1,28 +1,42 @@
 ﻿using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEditor;
 
 public class MapSerializer
 {
+    #region Types
+    [System.Serializable]
+    public struct MapProperties
+    {
+        public int m_Width;
+        public int m_Height;
+    }
+
+    [System.Serializable]
+    public struct CellProperties
+    {
+        public CellType.Type m_Type;
+    }
+    #endregion
+
     #region Constants
     const string c_DataPathAssets = "/Assets";
     #endregion
 
     #region Members
-    private InGameEditor.Properties[] m_CellsProperties = null;
-
-    private int m_Width  = 0;
-    private int m_Height = 0;
+    private MapProperties m_Properties = new MapProperties { m_Width = 0, m_Height = 0 };
+    private CellProperties[] m_CellsProperties = null;
     #endregion
 
     #region Properties
     public int Width
-    { get { return m_Width; } }
+    { get { return m_Properties.m_Width; } }
 
     public int Height
-    { get { return m_Height; } }
+    { get { return m_Properties.m_Height; } }
     #endregion
 
     #region Constructors
@@ -42,38 +56,37 @@ public class MapSerializer
 
         if ((m_CellsProperties == null) || (count != m_CellsProperties.Length))
         {
-            m_CellsProperties = new InGameEditor.Properties[count];
+            m_CellsProperties = new CellProperties[count];
         }
 
-        m_Width = width;
-        m_Height = height;
+        m_Properties.m_Width = width;
+        m_Properties.m_Height = height;
     }
     #endregion
 
     #region Values
     private int GetCellIndex(int column, int row)
     {
-        return row * m_Width + column;
+        return row * Width + column;
     }
 
-    public void SetValue(int column, int row, InGameEditor.Properties cell)
+    public void SetValue(int column, int row, CellProperties cell)
     {
         int index = GetCellIndex(column, row);
 
         m_CellsProperties[index] = cell;
     }
 
-    public InGameEditor.Properties GetValue(int column, int row)
+    public CellProperties GetValue(int column, int row)
     {
-        bool invalidColumn = (column < 0) || (column > m_Width);
-        bool invalidRow    = (row < 0) || (row > m_Height);
+        bool invalidColumn = (column < 0) || (column > Width);
+        bool invalidRow    = (row < 0) || (row > Height);
 
         if(invalidColumn || invalidRow)
         {
-            InGameEditor.Properties emptyCell = new InGameEditor.Properties
+            CellProperties emptyCell = new CellProperties
                 {
-                    groundType = InGameEditor.GroundType.Invalid,
-                    stone = false,
+                    m_Type = CellType.Type.None,
                 };
 
             return emptyCell;
@@ -105,6 +118,23 @@ public class MapSerializer
         {
             LoadFromBytes(mapAsset.bytes);
         }
+
+        ValidateMap();
+    }
+
+    private void ValidateMap()
+    {
+        int size = Width * Height;
+
+        if (size != m_CellsProperties.Length)
+        {
+            Debug.LogError("Inconsisten map properties");
+
+            m_Properties.m_Width  = 0;
+            m_Properties.m_Height = 0;
+
+            m_CellsProperties = null;
+        }
     }
 
     public bool IsInitialized()
@@ -115,40 +145,30 @@ public class MapSerializer
     private void SaveToFile(string path)
     {
         FileStream fileStream = new FileStream(path, FileMode.Truncate);
-        BinaryWriter binaryWriter = new BinaryWriter(fileStream);
 
-        SaveMap(binaryWriter);
+        SaveMap(fileStream);
 
-        binaryWriter.Close();
         fileStream.Close();
     }
 
-    private void SaveMap(BinaryWriter binaryWriter)
+    private void SaveMap(Stream stream)
     {
-        SavePrefix(binaryWriter);
-        SaveCells(binaryWriter);
+        SavePrefix(stream);
+        SaveCells(stream);
     }
 
-    private void SavePrefix(BinaryWriter binaryWriter)
+    private void SavePrefix(Stream stream)
     {
-        binaryWriter.Write(m_Width);
-        binaryWriter.Write(m_Height);
+        BinaryFormatter binaryFormatter = new BinaryFormatter();
+
+        binaryFormatter.Serialize(stream, m_Properties);
     }
 
-    private void SaveCells(BinaryWriter binaryWriter)
+    private void SaveCells(Stream stream)
     {
-        for (int i = 0; i < m_CellsProperties.Length; ++i)
-        {
-            SaveCell(binaryWriter, m_CellsProperties[i]);
-        }
-    }
+        BinaryFormatter binaryFormatter = new BinaryFormatter();
 
-    private void SaveCell(BinaryWriter binaryWriter, InGameEditor.Properties cell)
-    {
-        int groundType = (int)cell.groundType;
-
-        binaryWriter.Write(groundType);
-        binaryWriter.Write(cell.stone);
+        binaryFormatter.Serialize(stream, m_CellsProperties);
     }
 
     private void LoadFromBytes(byte[] bytesArray)
@@ -160,55 +180,39 @@ public class MapSerializer
         }
 
         MemoryStream memoryStream = new MemoryStream(bytesArray);
-        BinaryReader binaryReader = new BinaryReader(memoryStream);
 
-        LoadMap(binaryReader);
+        LoadMap(memoryStream);
 
-        binaryReader.Close();
         memoryStream.Close();
     }
 
     private void LoadFromFile(string path)
     {
         FileStream fileStream = new FileStream(path, FileMode.Open);
-        BinaryReader binaryReader = new BinaryReader(fileStream);
 
-        LoadMap(binaryReader);
+        LoadMap(fileStream);
 
-        binaryReader.Close();
         fileStream.Close();
     }
 
-    private void LoadMap(BinaryReader binaryReader)
+    private void LoadMap(Stream stream)
     {
-        LoadPrefix(binaryReader);
-        LoadCells(binaryReader);
+        LoadPrefix(stream);
+        LoadCells(stream);
     }
 
-    private void LoadPrefix(BinaryReader binaryReader)
+    private void LoadPrefix(Stream stream)
     {
-        int width  = binaryReader.ReadInt32();
-        int height = binaryReader.ReadInt32();
+        BinaryFormatter binaryFormatter = new BinaryFormatter();
 
-        Resize(width, height);
+        m_Properties = (MapProperties)binaryFormatter.Deserialize(stream);
     }
 
-    private void LoadCells(BinaryReader binaryReader)
+    private void LoadCells(Stream stream)
     {
-        for(int i = 0; i < m_CellsProperties.Length; ++i)
-        {
-            m_CellsProperties[i] = LoadCell(binaryReader);
-        }
-    }
+        BinaryFormatter binaryFormatter = new BinaryFormatter();
 
-    private InGameEditor.Properties LoadCell(BinaryReader binaryReader)
-    {
-        InGameEditor.Properties cell;
-
-        cell.groundType = (InGameEditor.GroundType)binaryReader.ReadInt32();
-        cell.stone      = binaryReader.ReadBoolean();
-
-        return cell;
+        m_CellsProperties = (CellProperties[])binaryFormatter.Deserialize(stream);
     }
     #endregion
 }
