@@ -39,6 +39,7 @@ public struct HexCoordinates
 public class HexGrid : MonoBehaviour
 {
     [SerializeField] private TextAsset mapAsset = null;
+    private GameState gameState;
 
     public int width = 6;
     public int height = 6;
@@ -121,6 +122,10 @@ public class HexGrid : MonoBehaviour
         }
 
         mapSerializer = null;
+        selectedCell = cells[GetCellIndex(0, 0)];
+
+        gameState = FindObjectOfType<GameState>();
+        gameState.MovePlayerToCell(selectedCell);
     }
 
     void CreateCell(int column, int row, bool load)
@@ -298,11 +303,17 @@ public class HexGrid : MonoBehaviour
 
     public void HiglightCell(int column, int row)
     {
+        if (gameState.IsBlocked)
+        {
+            return;
+        }
+
         int index = GetCellIndex(column, row);
         HexCell cell = cells[index];
 
         if (cell == selectedCell)
         {
+            GetComponentInChildren<CursorManager>().SetCursor(CursorManager.CursorType.Arrow);
             return;
         }
 
@@ -360,6 +371,11 @@ public class HexGrid : MonoBehaviour
 
     public void SelectCell(int column, int row)
     {
+        if (gameState.IsBlocked)
+        {
+            return;
+        }
+
         int index = GetCellIndex(column, row);
         HexCell cell = cells[index];
 
@@ -368,9 +384,20 @@ public class HexGrid : MonoBehaviour
             return;
         }
 
+        List<HexCell> path = MakePath(selectedCell, cell);
+        // Our path is in reverse order for player
+        path.Reverse();
+
+        // This may happen if we're already moving. Kind of error
+        if (!gameState.MovePlayerThroughPath(path))
+        {
+            return;
+        }
+
         selectedCell = cell;
         cell.Draw(cell.activeSprite);
         RemoveSelection();
+
         //hexMesh.SelectCell();
     }
 
