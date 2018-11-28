@@ -6,20 +6,20 @@ public class CursorManager : MonoBehaviour
 {
     public enum CursorType
     {
+        None = -1,
         Arrow,
         Walk,
         Stop
     }
 
-    CursorType currentCursor;
+    CursorType currentCursor = CursorType.None;
     public Texture2D arrowCursor;
     public Texture2D walkCursor;
     public Texture2D stopCursor;
 
     void Awake()
     {
-        currentCursor = CursorType.Walk;
-        Cursor.SetCursor(walkCursor, Vector2.zero, CursorMode.Auto);
+        SetCursor(CursorType.Walk);
     }
 
     public void SetCursor(CursorType type)
@@ -41,6 +41,10 @@ public class CursorManager : MonoBehaviour
                 break;
             case CursorType.Stop:
                 Cursor.SetCursor(stopCursor, new Vector2(32, 32), CursorMode.Auto);
+                break;
+
+            default:
+                Debug.Assert(false, "Invalid Cursor");
                 break;
         }
         

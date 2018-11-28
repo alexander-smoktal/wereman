@@ -4,7 +4,7 @@ using UnityEngine;
 
 // Move functionality should be moved to Creatures interface
 public class MainCharacter : MonoBehaviour {
-    private static float sMoveSpeed = 1.5f;
+    private static float sMoveSpeed = 75.0f;
 
     // Child components
     private Rigidbody2D rb2D;
@@ -42,7 +42,7 @@ public class MainCharacter : MonoBehaviour {
     }
 	
 	// Update is called once per frame
-	void Update () {
+	void FixedUpdate () {
         if (cellToMoveTo)
         {
             if (Vector2.Distance(transform.position, cellToMoveTo.transform.position) < 1)
@@ -59,7 +59,7 @@ public class MainCharacter : MonoBehaviour {
                 return;
             }
 
-            Vector2 newPosition = Vector2.MoveTowards(transform.position, cellToMoveTo.transform.position, sMoveSpeed);
+            Vector2 newPosition = Vector2.MoveTowards(transform.position, cellToMoveTo.transform.position, sMoveSpeed*Time.fixedDeltaTime);
             rb2D.MovePosition(newPosition);
         }
     }

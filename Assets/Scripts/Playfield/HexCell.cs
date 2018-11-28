@@ -4,9 +4,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HexCell : MonoBehaviour {
+public class HexCell : MonoBehaviour
+{
     [Header("Painter")]
     public CellPainter painterPrefab;
+
+    [Header("Collider")]
+    public HexCellMeshCollider colliderPrefab;
 
     [Header("Colors")]
     static public Color clickColor = Color.red;
@@ -30,6 +34,7 @@ public class HexCell : MonoBehaviour {
 
     CellType type = null;
     CellPainter painter = null;
+    HexCellMeshCollider cellCollider = null;
 
     void Awake()
     {
@@ -49,6 +54,13 @@ public class HexCell : MonoBehaviour {
         painter = Instantiate(painterPrefab);
         painter.Init(type);
         painter.transform.SetParent(transform, false);
+
+        cellCollider = Instantiate(colliderPrefab);
+        cellCollider.transform.SetParent(transform, false);
+
+        Vector3 colliderLocalScale  = cellCollider.transform.localScale;
+        Vector3 colliderGlobalScale = cellCollider.transform.lossyScale;
+        cellCollider.transform.localScale = new Vector3(colliderLocalScale.x / colliderGlobalScale.x, colliderLocalScale.y / colliderGlobalScale.y, colliderLocalScale.z / colliderGlobalScale.z);
     }
 
     public static class Geometry {

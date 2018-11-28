@@ -79,8 +79,8 @@ public class MapSerializer
 
     public CellProperties GetValue(int column, int row)
     {
-        bool invalidColumn = (column < 0) || (column > Width);
-        bool invalidRow    = (row < 0) || (row > Height);
+        bool invalidColumn = (column < 0) || (column >= Width);
+        bool invalidRow    = (row < 0) || (row >= Height);
 
         if(invalidColumn || invalidRow)
         {

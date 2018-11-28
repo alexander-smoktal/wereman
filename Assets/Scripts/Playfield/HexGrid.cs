@@ -48,9 +48,9 @@ public class HexGrid : MonoBehaviour
     public Text cellLabelPrefab;
 
     Canvas gridCanvas;
-    HexMesh hexMesh;
     HexCell[] cells;
-    HexCell selectedCell;
+    HexCell higlightedCell = null;
+    HexCell selectedCell   = null;
 
     MapSerializer mapSerializer = null;
 
@@ -100,7 +100,6 @@ public class HexGrid : MonoBehaviour
 
     void Start()
     {
-        hexMesh.Triangulate(cells);
     }
 
     void Awake()
@@ -109,7 +108,6 @@ public class HexGrid : MonoBehaviour
         bool isLoaded = (mapSerializer != null) && mapSerializer.IsInitialized();
 
         gridCanvas = GetComponentInChildren<Canvas>();
-        hexMesh = GetComponentInChildren<HexMesh>();
 
         cells = new HexCell[height * width];
 
@@ -293,7 +291,19 @@ public class HexGrid : MonoBehaviour
 
     public Vector2Int GetCell(Ray ray)
     {
-        return hexMesh.GetCell(ray);
+        RaycastHit hitInfo;
+        if(Physics.Raycast(ray, out hitInfo, Mathf.Infinity, HexCellMeshCollider.c_RaycastLayer))
+        {
+            var cell = hitInfo.collider.GetComponentInParent<HexCell>();
+
+            if (cell != null)
+            {
+                var cellIndex = new Vector2Int(cell.column, cell.row);
+                return cellIndex;
+            }
+        }
+
+        return new Vector2Int(-1, -1);
     }
 
     public void OverUI()
@@ -310,6 +320,8 @@ public class HexGrid : MonoBehaviour
 
         int index = GetCellIndex(column, row);
         HexCell cell = cells[index];
+
+        higlightedCell = cell;
 
         if (cell == selectedCell)
         {
@@ -345,28 +357,22 @@ public class HexGrid : MonoBehaviour
         {
             GetComponentInChildren<CursorManager>().SetCursor(CursorManager.CursorType.Stop);
         }
-        
-        //hexMesh.HiglightCell(cell);
     }
 
     public void RemoveHiglighting()
     {
         RemoveSelection();
-        //hexMesh.RemoveHiglighting();
+        higlightedCell = null;
     }
 
-    public Vector2Int higlightedCell
+    public Vector2Int GetHiglightedCell()
     {
-        get
-        {
-            var cellIndex = new Vector2Int(-1, -1);
+        var cellIndex = new Vector2Int(-1, -1);
 
-            var cell = hexMesh.higlightedCell;
-            if (cell != null)
-                cellIndex = new Vector2Int(cell.column, cell.row);
+        if (higlightedCell != null)
+            cellIndex = new Vector2Int(higlightedCell.column, higlightedCell.row);
 
-            return cellIndex;
-        }
+        return cellIndex;
     }
 
     public void SelectCell(int column, int row)
@@ -397,8 +403,6 @@ public class HexGrid : MonoBehaviour
         selectedCell = cell;
         cell.Draw(cell.activeSprite);
         RemoveSelection();
-
-        //hexMesh.SelectCell();
     }
 
     public void RemoveSelection()
@@ -412,7 +416,6 @@ public class HexGrid : MonoBehaviour
         {
             selectedCell.Draw(selectedCell.activeSprite);
         }
-        // hexMesh.RemoveHiglighting();
     }
 
     #region Editor

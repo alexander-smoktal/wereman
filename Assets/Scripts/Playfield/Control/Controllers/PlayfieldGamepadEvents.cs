@@ -81,7 +81,7 @@ public class PlayfieldGamepadEvents : ControllerEventBase
 
         SetMovementDelay();
 
-        var cellIndex = m_PlayfieldComponent.higlightedCell;
+        var cellIndex = m_PlayfieldComponent.GetHiglightedCell();
         cellIndex.x += dx;
         cellIndex.y += dy;
 

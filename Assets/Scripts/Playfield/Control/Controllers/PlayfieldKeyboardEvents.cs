@@ -55,7 +55,8 @@ public class PlayfieldKeyboardEvents : ControllerEventBase
         if ((dx == 0) && (dy == 0))
             return;
 
-        var cellIndex = m_PlayfieldComponent.higlightedCell;
+        var cellIndex = m_PlayfieldComponent.GetHiglightedCell();
+
         cellIndex.x += dx;
         cellIndex.y += dy;
 
