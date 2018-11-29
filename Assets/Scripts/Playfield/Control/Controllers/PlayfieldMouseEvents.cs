@@ -73,6 +73,11 @@ public class PlayfieldMouseEvents : ControllerEventBase
     {
         if (Input.GetMouseButtonDown(0))
             SetEvent(PlayfieldEvents.InputEvents.Select);
+
+        if (Input.GetMouseButton(0))
+        {
+            SetEvent(PlayfieldEvents.InputEvents.LMBPressed);
+        }
     }
 
     private void UpdateMovementUI()

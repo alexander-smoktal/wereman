@@ -94,6 +94,12 @@ public class PlayfieldControl : PlayfieldControlBase
 
         if (IsValidCell(m_CurrentCell))
             m_PlayfieldComponent.SetEditorSelection(m_CurrentCell.x, m_CurrentCell.y);
+
+        // Update cells if MB pressed
+        if (PlayfieldEvents.HasEvent(PlayfieldEvents.InputEvents.LMBPressed))
+        {
+            m_PlayfieldComponent.SetCellProperties(m_CurrentCell.x, m_CurrentCell.y, m_EditorProperties);
+        }
     }
 
     private void EditorUpdateCell()

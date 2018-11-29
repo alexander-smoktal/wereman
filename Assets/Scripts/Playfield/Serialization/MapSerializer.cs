@@ -82,7 +82,9 @@ public class MapSerializer
         bool invalidColumn = (column < 0) || (column >= Width);
         bool invalidRow    = (row < 0) || (row >= Height);
 
-        if(invalidColumn || invalidRow)
+        int index = GetCellIndex(column, row);
+
+        if (invalidColumn || invalidRow || index >= m_CellsProperties.Length)
         {
             CellProperties emptyCell = new CellProperties
                 {
@@ -92,8 +94,7 @@ public class MapSerializer
             return emptyCell;
         }
 
-        int index = GetCellIndex(column, row);
-
+        // In case previously save map is 
         return m_CellsProperties[index];
     }
     #endregion

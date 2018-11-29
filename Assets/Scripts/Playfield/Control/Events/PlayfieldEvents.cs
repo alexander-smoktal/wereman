@@ -10,6 +10,7 @@ public class PlayfieldEvents : ControlEventsManager
         Invalid = -1,
         
         CursorMove,
+        LMBPressed,
         Select,
         CursorMoveOverUI,
 

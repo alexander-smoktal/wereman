@@ -51,6 +51,9 @@ public class HexGrid : MonoBehaviour
     HexCell[] cells;
     HexCell higlightedCell = null;
     HexCell selectedCell   = null;
+    
+    private BoundingRect boundingRect;
+    public BoundingRect BoundingRect { get { return boundingRect; } }
 
     MapSerializer mapSerializer = null;
 
@@ -102,6 +105,20 @@ public class HexGrid : MonoBehaviour
     {
     }
 
+    // Bounding rect for camera movement and stuff
+    void ComputeBoundingRect()
+    {
+        HexCell bottomLeftCell = cells[GetCellIndex(0, 0)];
+        HexCell topRightCell = cells[GetCellIndex(width - 1, height - 1)];
+
+        boundingRect = new BoundingRect(bottomLeftCell.transform.position.x,
+            topRightCell.transform.position.x,
+            bottomLeftCell.transform.position.y,
+            topRightCell.transform.position.y);
+
+        FindObjectOfType<CameraMovement>().MoveBoundingRect = boundingRect;
+    }
+
     void Awake()
     {
         LoadMap();
@@ -124,6 +141,8 @@ public class HexGrid : MonoBehaviour
 
         gameState = FindObjectOfType<GameState>();
         gameState.MovePlayerToCell(selectedCell);
+
+        ComputeBoundingRect();
     }
 
     void CreateCell(int column, int row, bool load)
