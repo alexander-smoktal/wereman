@@ -437,6 +437,36 @@ public class HexGrid : MonoBehaviour
         }
     }
 
+    public List<HexCell> GetCells(Bounds bounds)
+    {
+        List<HexCell> cellsList = new List<HexCell>();
+
+        foreach(var cell in cells)
+        {
+            if (MPR.IsIntersect2D(bounds, cell.GetCollider().bounds))
+            {
+                cellsList.Add(cell);
+            }
+        }
+
+        return cellsList;
+    }
+
+    public List<HexCell> GetCells(Collider2D collider)
+    {
+        List<HexCell> cellsList = new List<HexCell>();
+
+        foreach (var cell in cells)
+        {
+            if (MPR.IsIntersect(collider, cell.GetCollider()))
+            {
+                cellsList.Add(cell);
+            }
+        }
+
+        return cellsList;
+    }
+
     #region Editor
     public void SetEditorSelection(int column, int row)
     {

@@ -9,11 +9,12 @@ public class CellType
     [Flags]
     public enum Type
     {
-        None  = 0,
-        Sand  = 1,
-        Grass = 1 << 1,
-        Dirt  = 1 << 2,
-        Stone = 1 << 3,
+        None     = 0,
+        Sand     = 1,
+        Grass    = 1 << 1,
+        Dirt     = 1 << 2,
+        Stone    = 1 << 3,
+        Obstacle = 1 << 4,
     }
 
     Type type;
@@ -35,6 +36,6 @@ public class CellType
 
     public bool IsPassable()
     {
-        return (type & Type.Stone) == Type.None;
+        return (type & (Type.Stone | Type.Obstacle)) == Type.None;
     }
 }

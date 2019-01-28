@@ -10,7 +10,8 @@ public class HexCell : MonoBehaviour
     public CellPainter painterPrefab;
 
     [Header("Collider")]
-    public HexCellMeshCollider colliderPrefab;
+    public HexCellMeshCollider    colliderPrefab;
+    public HexCellPolygonCollider collider2DPrefab;
 
     [Header("Colors")]
     static public Color clickColor = Color.red;
@@ -35,6 +36,7 @@ public class HexCell : MonoBehaviour
     CellType type = null;
     CellPainter painter = null;
     HexCellMeshCollider cellCollider = null;
+    HexCellPolygonCollider cellCollider2D = null;
 
     void Awake()
     {
@@ -55,12 +57,17 @@ public class HexCell : MonoBehaviour
         painter.Init(type);
         painter.transform.SetParent(transform, false);
 
-        cellCollider = Instantiate(colliderPrefab);
-        cellCollider.transform.SetParent(transform, false);
+        cellCollider = Instantiate(colliderPrefab, transform, false);
 
         Vector3 colliderLocalScale  = cellCollider.transform.localScale;
         Vector3 colliderGlobalScale = cellCollider.transform.lossyScale;
         cellCollider.transform.localScale = new Vector3(colliderLocalScale.x / colliderGlobalScale.x, colliderLocalScale.y / colliderGlobalScale.y, colliderLocalScale.z / colliderGlobalScale.z);
+
+        cellCollider2D = Instantiate(collider2DPrefab, transform, false);
+
+        Vector3 collider2DLocalScale  = cellCollider2D.transform.localScale;
+        Vector3 collider2DGlobalScale = cellCollider2D.transform.lossyScale;
+        cellCollider2D.transform.localScale = new Vector3(collider2DLocalScale.x / collider2DGlobalScale.x, collider2DLocalScale.y / collider2DGlobalScale.y, collider2DLocalScale.z / collider2DGlobalScale.z);
     }
 
     public static class Geometry {
@@ -116,5 +123,22 @@ public class HexCell : MonoBehaviour
             if(painter != null)
                 painter.Init(type);
         }
+    }
+
+    public void AddType(CellType.Type cellType)
+    {
+        CellType.Type newtype = type.Get() | cellType;
+        SetType(newtype);
+    }
+
+    public void RemoveType(CellType.Type cellType)
+    {
+        CellType.Type newtype = type.Get() & ~cellType;
+        SetType(newtype);
+    }
+
+    public Collider2D GetCollider()
+    {
+        return cellCollider2D.GetCollider();
     }
 }
