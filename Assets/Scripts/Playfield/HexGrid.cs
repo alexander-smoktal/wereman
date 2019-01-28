@@ -443,7 +443,7 @@ public class HexGrid : MonoBehaviour
 
         foreach(var cell in cells)
         {
-            if (MPR.IsIntersect2D(bounds, cell.GetCollider().bounds))
+            if (CollisionDetection.Collider2D.IsIntersect(bounds, cell.GetCollider().bounds))
             {
                 cellsList.Add(cell);
             }
@@ -458,7 +458,7 @@ public class HexGrid : MonoBehaviour
 
         foreach (var cell in cells)
         {
-            if (MPR.IsIntersect(collider, cell.GetCollider()))
+            if (CollisionDetection.Collider2D.IsIntersect(collider, cell.GetCollider()))
             {
                 cellsList.Add(cell);
             }
