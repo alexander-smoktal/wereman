@@ -18,6 +18,16 @@ namespace CollisionDetection
             return m_Collider2D.transform.TransformPoint(m_Collider2D.offset);
         }
 
+        public bool IsIntersect(UnityEngine.Collider2D collider)
+        {
+            return IsIntersect(this, collider);
+        }
+
+        public bool IsIntersect(Collider2D collider)
+        {
+            return IsIntersect(this, collider);
+        }
+
         #region Properties
         //
         // Summary:
@@ -33,7 +43,7 @@ namespace CollisionDetection
         #region Static Methods
         public static bool IsIntersect(Bounds bounds1, Bounds bounds2)
         {
-            return MPR.IsIntersect2D(bounds1, bounds2);
+            return Utility.IsIntersect2D(bounds1, bounds2);
         }
 
         public static bool IsIntersect(UnityEngine.Collider2D collider1, UnityEngine.Collider2D collider2)
@@ -42,6 +52,11 @@ namespace CollisionDetection
         }
 
         public static bool IsIntersect(Collider2D collider1, Collider2D collider2)
+        {
+            return MPR.IsIntersect(collider1, collider2);
+        }
+
+        public static bool IsIntersect(Collider2D collider1, UnityEngine.Collider2D collider2)
         {
             return MPR.IsIntersect(collider1, collider2);
         }

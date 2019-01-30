@@ -26,6 +26,9 @@ public class MapObjectComponent : MonoBehaviour
 
     protected new Collider2D collider
     { get { return m_Collider; } }
+
+    public bool isObstacle
+    { get { return m_IsObstacle; } }
     #endregion
 
     #region MonoBehaviour
@@ -39,27 +42,27 @@ public class MapObjectComponent : MonoBehaviour
     public void AttachCells(List<HexCell> cells)
     {
         if (m_IsObstacle)
-            ClearObstacles();
+            DeattachCells();
 
         m_AttachedCells = cells;
 
         if (m_IsObstacle)
-            SetObstacles();
+            AttachCells();
     }
 
-    private void ClearObstacles()
+    private void DeattachCells()
     {
         foreach (var cell in m_AttachedCells)
         {
-            cell.RemoveType(CellType.Type.Obstacle);
+            cell.DeattachMapObject(this);
         }
     }
 
-    private void SetObstacles()
+    private void AttachCells()
     {
         foreach(var cell in m_AttachedCells)
         {
-            cell.AddType(CellType.Type.Obstacle);
+            cell.AttachMapObject(this);
         }
     }
 

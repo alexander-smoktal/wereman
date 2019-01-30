@@ -38,6 +38,8 @@ public class HexCell : MonoBehaviour
     HexCellMeshCollider cellCollider = null;
     HexCellPolygonCollider cellCollider2D = null;
 
+    HashSet<MapObjectComponent> attachedMapObjects = new HashSet<MapObjectComponent>();
+
     void Awake()
     {
         if (type == null)
@@ -94,9 +96,20 @@ public class HexCell : MonoBehaviour
             && Math.Abs(position.y - point.y) < Geometry.innerRadius;
     }
 
+    private bool IsContainsObstacle()
+    {
+        foreach(var obj in attachedMapObjects)
+        {
+            if (obj.isObstacle)
+                return true;
+        }
+
+        return false;
+    }
+
     public bool IsPassable()
     {
-        return type.IsPassable();
+        return !IsContainsObstacle() && type.IsPassable();
     }
 
     public void Draw(Sprite sprite)
@@ -140,5 +153,15 @@ public class HexCell : MonoBehaviour
     public Collider2D GetCollider()
     {
         return cellCollider2D.GetCollider();
+    }
+
+    public void AttachMapObject(MapObjectComponent mapObject)
+    {
+        attachedMapObjects.Add(mapObject);
+    }
+
+    public void DeattachMapObject(MapObjectComponent mapObject)
+    {
+        attachedMapObjects.Remove(mapObject);
     }
 }
